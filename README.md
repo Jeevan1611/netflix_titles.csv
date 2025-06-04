@@ -38,3 +38,16 @@ def get_recommendations(title, cosine_sim=cosine_sim):
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:6]
     movie_indices = [i[0] for i in sim_scores]
     return df['title'].iloc[movie_indices]
+import streamlit as st
+
+st.title("Netflix Recommendation System")
+movie = st.text_input("Enter a movie title:")
+if movie:
+    try:
+        recs = get_recommendations(movie)
+        st.write("Top Recommendations:")
+        for r in recs:
+            st.write(r)
+    except:
+        st.write("Movie not found in database.")
+streamlit run app/streamlit_app.py
