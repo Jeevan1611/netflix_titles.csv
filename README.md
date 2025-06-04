@@ -21,3 +21,20 @@ top_countries.plot(kind='bar', title='Top Producing Countries')
 df['date_added'] = pd.to_datetime(df['date_added'])
 df['year_added'] = df['date_added'].dt.year
 df['year_added'].value_counts().sort_index().plot(title='Netflix Additions Over Years')
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
+
+df['description'] = df['description'].fillna('')
+tfidf = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf.fit_transform(df['description'])
+
+cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+
+indices = pd.Series(df.index, index=df['title']).drop_duplicates()
+
+def get_recommendations(title, cosine_sim=cosine_sim):
+    idx = indices[title]
+    sim_scores = list(enumerate(cosine_sim[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:6]
+    movie_indices = [i[0] for i in sim_scores]
+    return df['title'].iloc[movie_indices]
